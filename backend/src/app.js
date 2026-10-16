@@ -19,6 +19,16 @@ app.use(express.urlencoded())
 app.use(express.static("public"))
 app.use(cookieParser())
 
+
+import authRouter from "./routes/authRoutes.js"
+import serviceRouter from "./routes/serviceRoutes.js"
+import portfolioRouter from "./routes/portfolioRoutes.js"
+
+
+app.use("/api/auth",authRouter)
+app.use("/api/service",serviceRouter)
+app.use('/api/portfolio',portfolioRouter)
+
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || "Something went wrong";
