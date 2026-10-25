@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Home from './pages/Home.jsx'
 import Footer from './components/footer.jsx'
+import Register from './pages/Register.jsx'
+import Login from './pages/Login.jsx'
 
 function Placeholder({ title }) {
   return (
@@ -25,8 +27,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/services" element={<Placeholder title="Our Services" />} />
         <Route path="/portfolio" element={<Placeholder title="Our Work" />} />
-        <Route path="/login" element={<Placeholder title="Login" />} />
-        <Route path="/register" element={<Placeholder title="Create Your Account" />} />
+       <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />
         
       </Routes>
