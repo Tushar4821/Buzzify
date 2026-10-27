@@ -5,6 +5,9 @@ import Home from './pages/Home.jsx'
 import Footer from './components/footer.jsx'
 import Register from './pages/Register.jsx'
 import Login from './pages/Login.jsx'
+import About from './pages/About.jsx'
+import Services from './pages/Services.jsx'
+import Work from './pages/Work.jsx'
 
 function Placeholder({ title }) {
   return (
@@ -25,8 +28,9 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/services" element={<Placeholder title="Our Services" />} />
-        <Route path="/portfolio" element={<Placeholder title="Our Work" />} />
+        <Route path="/service" element={<Services />} />
+        <Route path="/portfolio" element={<Work />} />
+        <Route path="/about" element={<About />} />
        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />

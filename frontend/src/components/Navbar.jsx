@@ -6,7 +6,7 @@ import buzzifyLogo from "../assets/Buzzify Logo.png"
 
 const navLinks = [
   { name: 'Home', path: '/' },
-  { name: 'Services', path: '/services' },
+  { name: 'Services', path: '/service' },
   { name: 'Our Work', path: '/portfolio' },
 ]
 
@@ -47,7 +47,7 @@ export default function Navbar() {
           ))}
 
           <a
-            href="/#about"
+            href="/about"
             className="text-white/70 transition-colors hover:text-[#D4AF37]"
           >
             About Us
@@ -97,7 +97,7 @@ export default function Navbar() {
           </NavLink>
 
           <a
-            href="/#about"
+            href="/about"
             onClick={() => setMenuOpen(false)}
             className="block text-white/70 hover:text-[#D4AF37]"
           >
