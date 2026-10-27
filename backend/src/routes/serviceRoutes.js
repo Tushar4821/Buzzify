@@ -3,6 +3,7 @@ import express from "express";
 import {
   createService,
   getAllServices,
+  getAllServicesAdmin,
   getServiceById,
   updateService,
   deleteService,
@@ -15,6 +16,16 @@ const serviceRouter = express.Router();
 
 // Public routes
 serviceRouter.get("/", getAllServices);
+
+// Admin-only: list all services, including inactive ones.
+// Keep this before the /:id route.
+serviceRouter.get(
+  "/admin/all",
+  protect,
+  adminMiddleware,
+  getAllServicesAdmin
+);
+
 serviceRouter.get("/:id", getServiceById);
 
 // Admin-only routes

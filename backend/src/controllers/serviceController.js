@@ -1,32 +1,42 @@
-
 import Service from "../models/Service.js";
 
-
-
-// CREATE SERVICE
+// CREATE SERVICE (Admin only)
 export const createService = async (req, res) => {
   try {
-    const { title, description, price, category, image } = req.body;
-
-    if (!title || !description || !price || !category) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all required fields",
-      });
-    }
+    const { title, description, icon, features, isActive } = req.body;
 
     const service = await Service.create({
       title,
       description,
-      price,
-      category,
-      image,
+      ...(icon !== undefined && { icon }),
+      ...(features !== undefined && { features }),
+      ...(isActive !== undefined && { isActive }),
     });
 
     return res.status(201).json({
       success: true,
       message: "Service created successfully",
       service,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// GET ALL ACTIVE SERVICES (Public website)
+export const getAllServices = async (req, res) => {
+  try {
+    const services = await Service.find({ isActive: true }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: services.length,
+      services,
     });
   } catch (error) {
     return res.status(500).json({
@@ -36,10 +46,10 @@ export const createService = async (req, res) => {
   }
 };
 
-// GET ALL SERVICES
-export const getAllServices = async (req, res) => {
+// GET ALL SERVICES INCLUDING INACTIVE (Admin dashboard)
+export const getAllServicesAdmin = async (req, res) => {
   try {
-    const services = await Service.find();
+    const services = await Service.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -66,25 +76,52 @@ export const getServiceById = async (req, res) => {
       });
     }
 
+    // Public visitors should not access inactive services.
+    if (!service.isActive && req.user?.role !== "admin") {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       service,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-// UPDATE SERVICE
+// UPDATE SERVICE (Admin only)
 export const updateService = async (req, res) => {
   try {
+    const allowedFields = [
+      "title",
+      "description",
+      "icon",
+      "features",
+      "isActive",
+    ];
+
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
     const service = await Service.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true, runValidators: true }
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
     if (!service) {
@@ -100,14 +137,14 @@ export const updateService = async (req, res) => {
       service,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-// DELETE SERVICE
+// DELETE SERVICE (Admin only)
 export const deleteService = async (req, res) => {
   try {
     const service = await Service.findByIdAndDelete(req.params.id);
@@ -124,7 +161,7 @@ export const deleteService = async (req, res) => {
       message: "Service deleted successfully",
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
