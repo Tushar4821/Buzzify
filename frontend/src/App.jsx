@@ -10,11 +10,16 @@ import Login from "./pages/Login.jsx";
 import About from "./pages/About.jsx";
 import Services from "./pages/Services.jsx";
 import Work from "./pages/Work.jsx";
+import Meeting from "./pages/Meeting.jsx";
+
 
 // Admin pages
 import AdminLayout from "./admin/AdminLayout.jsx";
 import AdminDashboard from "./admin/AdminDashboard.jsx";
 import AdminRoute from "./admin/AdminRoutes.jsx";
+import ManageServices from "./admin/ManageService.jsx";
+import ManageWork from "./admin/ManageWork.jsx";
+import ManageMeetings from "./admin/ManageMeetings.jsx";
 
 function Placeholder({ title }) {
   return (
@@ -38,6 +43,7 @@ function PublicLayout() {
         <Route path="/service" element={<Services />} />
         <Route path="/portfolio" element={<Work />} />
         <Route path="/about" element={<About />} />
+        <Route path="/meeting" element={<Meeting />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />
@@ -56,19 +62,19 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
 
         <Route
-          path="services"
-          element={<Placeholder title="Manage Services" />}
-        />
+  path="services"
+  element={<ManageServices />}
+/>
 
         <Route
-          path="work"
-          element={<Placeholder title="Manage Our Work" />}
-        />
+  path="work"
+  element={<ManageWork />}
+/>
 
         <Route
-          path="meetings"
-          element={<Placeholder title="Meeting Requests" />}
-        />
+  path="meetings"
+  element={<ManageMeetings />}
+/>
 
         <Route
           path="clients"

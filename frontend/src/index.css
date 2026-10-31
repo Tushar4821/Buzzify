@@ -33,3 +33,8 @@ a {
   background: #d4af37;
   color: #171717;
 }
+@layer components {
+  .meeting-input {
+    @apply w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-sm text-white outline-none transition placeholder:text-gray-600 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]/30 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
