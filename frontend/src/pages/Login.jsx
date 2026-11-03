@@ -11,7 +11,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
     setSuccess("");
 
@@ -64,17 +66,30 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Invalid email or password.");
+        throw new Error(
+          data.message || "Invalid email or password."
+        );
       }
 
       if (!data.token || !data.user) {
-        throw new Error("Login response is incomplete. Please try again.");
+        throw new Error(
+          "Login response is incomplete. Please try again."
+        );
       }
 
-      // Store authentication details using your existing keys.
+      // Store authentication details
       try {
         localStorage.setItem("buzzifyToken", data.token);
-        localStorage.setItem("buzzifyUser", JSON.stringify(data.user));
+
+        localStorage.setItem(
+          "buzzifyUser",
+          JSON.stringify(data.user)
+        );
+
+        // Notify Navbar that login has succeeded
+        window.dispatchEvent(
+          new Event("buzzify-auth-change")
+        );
       } catch {
         throw new Error(
           "Login succeeded, but this browser could not save your session."
@@ -83,7 +98,7 @@ export default function Login() {
 
       setSuccess("Login successful! Welcome back.");
 
-      // Redirect according to the role returned by the backend.
+      // Redirect according to user role
       const destination =
         data.user.role === "admin" ? "/admin" : "/";
 
@@ -96,7 +111,9 @@ export default function Login() {
           "Unable to connect to the server. Make sure the backend is running and CORS is configured."
         );
       } else {
-        setError(err.message || "Something went wrong. Please try again.");
+        setError(
+          err.message || "Something went wrong. Please try again."
+        );
       }
     } finally {
       setLoading(false);
@@ -110,6 +127,7 @@ export default function Login() {
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#171717] px-4 py-16 text-white sm:px-6">
       {/* Background glow */}
       <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-[120px]" />
+
       <div className="pointer-events-none absolute -right-32 bottom-10 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-[120px]" />
 
       <motion.div
@@ -139,6 +157,7 @@ export default function Login() {
 
         {/* Login card */}
         <div className="rounded-2xl border border-white/10 bg-[#202020]/90 p-6 shadow-2xl shadow-black/20 sm:p-8">
+          {/* Error */}
           {error && (
             <div
               role="alert"
@@ -148,6 +167,7 @@ export default function Login() {
             </div>
           )}
 
+          {/* Success */}
           {success && (
             <div
               role="status"
@@ -157,7 +177,10 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
             {/* Email */}
             <div>
               <label
@@ -210,8 +233,14 @@ export default function Login() {
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() =>
+                    setShowPassword((prev) => !prev)
+                  }
+                  aria-label={
+                    showPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-[#D4AF37]"
                 >
                   {showPassword ? (

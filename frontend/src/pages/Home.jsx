@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import heroImage from "../assets/buzzify-hero.jpg";
 
 import {
   ArrowUpRight,
@@ -127,281 +128,261 @@ export default function Home() {
           HERO SECTION
       ========================================== */}
 
-      <section className="relative flex min-h-[90vh] items-center overflow-hidden px-5 py-24 sm:px-8 lg:min-h-212.5 lg:px-16">
+     
+{/* =========================================
+    BUZZIFY — CINEMATIC FULLSCREEN HERO
+========================================== */}
 
-        {/* Cinematic background */}
 
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-40 top-10 h-125 w-125 rounded-full bg-[#D4AF37]/10 blur-[150px]" />
+{/* =========================================
+    BUZZIFY — CINEMATIC HERO SECTION
+========================================== */}
 
-          <div className="absolute -right-20 top-40 h-112.5 w-112.5 rounded-full bg-[#D4AF37]/10 blur-[140px]" />
+<section className="group relative isolate flex min-h-[90svh] w-full items-center justify-center overflow-hidden bg-[#171717] sm:min-h-[calc(100svh-80px)]">
 
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#171717_80%)]" />
+  {/* BACKGROUND IMAGE WITH CINEMATIC ZOOM */}
+  <motion.div
+    initial={shouldReduceMotion ? false : { scale: 1.12 }}
+    animate={
+      shouldReduceMotion
+        ? { scale: 1 }
+        : { scale: [1, 1.055, 1] }
+    }
+    transition={{
+      duration: 24,
+      repeat: shouldReduceMotion ? 0 : Infinity,
+      ease: "easeInOut",
+    }}
+    className="absolute inset-0 -z-30"
+  >
+    <img
+      src={heroImage}
+      alt="Buzzify creative marketing background"
+      className="h-full w-full object-cover object-center"
+    />
+  </motion.div>
 
-          <div className="absolute inset-0 opacity-[0.035] bg-[linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] bg-size-[70px_70px]" />
-        </div>
+  {/* CINEMATIC DARK OVERLAY */}
+  <div className="absolute inset-0 -z-20 bg-black/35" />
 
-        {/* Animated decorative circle */}
+  <div className="absolute inset-0 -z-20 bg-gradient-to-b from-black/45 via-black/35 to-[#171717]/90" />
 
-        {!shouldReduceMotion && (
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 45,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="pointer-events-none absolute -right-48 top-20 h-162.5 w-162.5 rounded-full border border-[#D4AF37]/10"
-          >
-            <div className="absolute left-1/2 top-0 h-3 w-3 rounded-full bg-[#D4AF37] shadow-[0_0_30px_#D4AF37]" />
-          </motion.div>
-        )}
+  <div className="absolute inset-0 -z-20 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
+  {/* ANIMATED AMBIENT GOLD LIGHTS */}
+  {!shouldReduceMotion && (
+    <>
+      <motion.div
+        animate={{
+          x: [0, 35, 0],
+          y: [0, -30, 0],
+          opacity: [0.12, 0.3, 0.12],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="pointer-events-none absolute -left-20 top-[15%] -z-10 h-72 w-72 rounded-full bg-[#D4AF37]/25 blur-[120px]"
+      />
 
-          {/* Hero text */}
+      <motion.div
+        animate={{
+          x: [0, -30, 0],
+          y: [0, 35, 0],
+          opacity: [0.1, 0.25, 0.1],
+        }}
+        transition={{
+          duration: 13,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="pointer-events-none absolute -right-20 bottom-[10%] -z-10 h-80 w-80 rounded-full bg-[#D4AF37]/20 blur-[130px]"
+      />
+    </>
+  )}
 
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
-            className="relative z-20"
-          >
-            <motion.div variants={fadeUp} className="mb-8">
-              <div className="inline-flex items-center gap-3 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/5 px-4 py-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D4AF37] opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#D4AF37]" />
-                </span>
+  {/* OCCASIONAL GOLD LIGHT SWEEP */}
+  {!shouldReduceMotion && (
+    <motion.div
+      animate={{
+        x: ["-150%", "250%"],
+        opacity: [0, 0.35, 0],
+      }}
+      transition={{
+        duration: 3.5,
+        repeat: Infinity,
+        repeatDelay: 7,
+        ease: "easeInOut",
+      }}
+      className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent blur-3xl"
+    />
+  )}
 
-                <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#D4AF37] sm:text-xs">
-                  Creative thinking. Real impact.
-                </span>
-              </div>
-            </motion.div>
+  {/* MAIN HERO CONTENT */}
+  <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pb-32 pt-24 text-center sm:px-8 lg:pt-20">
 
-            <motion.h1
-              variants={fadeUp}
-              className="max-w-4xl text-5xl font-semibold leading-[1.05] tracking-[-0.055em] sm:text-6xl md:text-7xl xl:text-[88px]"
-            >
-              WE DON'T JUST
-              <br />
-              MARKET.
-              <br />
+    {/* TOP LABEL */}
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.2 }}
+      className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/25 bg-black/25 px-5 py-3 backdrop-blur-xl"
+    >
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D4AF37] opacity-70" />
+        <span className="relative h-2 w-2 rounded-full bg-[#D4AF37]" />
+      </span>
 
-              <span className="relative inline-block text-[#D4AF37]">
-                WE CREATE
+      <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/90 sm:text-xs">
+        Creative thinking. Real impact.
+      </span>
+    </motion.div>
 
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 1, delay: 1.1 }}
-                  className="absolute -bottom-2 left-0 h-0.75 w-full origin-left bg-[#D4AF37]"
-                />
-              </span>
+    {/* MAIN HEADING */}
+    <motion.h1
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 1.1,
+        delay: 0.4,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="max-w-5xl text-[clamp(2.5rem,6.2vw,5.5rem)] font-semibold leading-[1.06] tracking-[-0.06em] text-white"
+    >
+      WE DON'T JUST
+      <br />
 
-              <br />
+      MARKET.
+      <br />
 
-              <span className="text-white/90">IMPACT.</span>
-            </motion.h1>
+      <motion.span
+        animate={
+          shouldReduceMotion
+            ? {}
+            : {
+                textShadow: [
+                  "0 0 0px rgba(212,175,55,0)",
+                  "0 0 25px rgba(212,175,55,0.4)",
+                  "0 0 0px rgba(212,175,55,0)",
+                ],
+              }
+        }
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="relative inline-block text-[#D4AF37]"
+      >
+        WE CREATE IMPACT.
 
-            <motion.p
-              variants={fadeUp}
-              className="mt-9 max-w-lg text-base leading-8 text-white/55 sm:text-lg"
-            >
-              We help ambitious brands stand out, build influence
-              and create meaningful connections through creative
-              marketing that moves people.
-            </motion.p>
+        {/* ANIMATED GOLD UNDERLINE */}
+        <motion.span
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{
+            duration: 1.2,
+            delay: 1.3,
+            ease: "easeOut",
+          }}
+          className="absolute -bottom-2 left-0 h-[3px] w-full origin-left rounded-full bg-[#D4AF37]"
+        />
+      </motion.span>
+    </motion.h1>
 
-            <motion.div
-              variants={fadeUp}
-              className="mt-10 flex flex-wrap items-center gap-4"
-            >
-              <button
-                onClick={handleLetsTalk}
-                className="group inline-flex items-center gap-3 rounded-full bg-[#D4AF37] px-7 py-4 text-sm font-bold text-[#171717] transition-all duration-300 hover:-translate-y-1 hover:bg-[#E8C75B] hover:shadow-[0_10px_40px_rgba(212,175,55,0.2)]"
-              >
-                Let's Talk
+    {/* DESCRIPTION */}
+    <motion.p
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.8 }}
+      className="mt-9 max-w-2xl text-sm leading-7 text-white/80 sm:text-base sm:leading-8 lg:text-lg"
+    >
+      We help ambitious brands stand out, build influence
+      and create meaningful connections through creative
+      marketing that moves people.
+    </motion.p>
 
-                <ArrowUpRight
-                  size={19}
-                  className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                />
-              </button>
+    {/* ACTION BUTTONS */}
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 1 }}
+      className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row"
+    >
+      <button
+        onClick={handleLetsTalk}
+        className="group/btn inline-flex w-full items-center justify-center gap-3 rounded-full bg-[#D4AF37] px-8 py-4 text-sm font-bold text-[#171717] shadow-[0_10px_40px_rgba(212,175,55,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#E8C75B] hover:shadow-[0_12px_45px_rgba(212,175,55,0.35)] sm:w-auto"
+      >
+        Let's Talk
 
-              <Link
-                to="/portfolio"
-                className="group inline-flex items-center gap-3 rounded-full border border-white/20 px-7 py-4 text-sm font-semibold text-white transition-all duration-300 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-              >
-                Explore Our Work
+        <ArrowUpRight
+          size={19}
+          className="transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+        />
+      </button>
 
-                <ArrowRight
-                  size={17}
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </Link>
-            </motion.div>
+      <Link
+        to="/portfolio"
+        className="group/btn inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/40 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#D4AF37] hover:bg-white/10 hover:text-[#D4AF37] sm:w-auto"
+      >
+        Explore Our Work
 
-            <motion.div
-              variants={fadeUp}
-              className="mt-14 flex items-center gap-5 border-t border-white/10 pt-7"
-            >
-              <div className="flex -space-x-2">
-                {["01", "02", "03"].map((item) => (
-                  <div
-                    key={item}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#171717] bg-[#333] text-[10px] font-bold text-[#D4AF37]"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
+        <ArrowRight
+          size={18}
+          className="transition-transform duration-300 group-hover/btn:translate-x-1"
+        />
+      </Link>
+    </motion.div>
 
-              <div>
-                <p className="text-sm font-semibold">
-                  Ideas meet execution.
-                </p>
+    {/* BRAND VALUES */}
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1, delay: 1.4 }}
+      className="mt-16 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[9px] font-semibold uppercase tracking-[0.25em] text-white/65 sm:text-xs"
+    >
+      <span>Strategy</span>
+      <span className="h-1 w-1 rounded-full bg-[#D4AF37]" />
+      <span>Creativity</span>
+      <span className="h-1 w-1 rounded-full bg-[#D4AF37]" />
+      <span>Influence</span>
+      <span className="h-1 w-1 rounded-full bg-[#D4AF37]" />
+      <span>Growth</span>
+    </motion.div>
 
-                <p className="mt-1 text-xs text-white/40">
-                  Let's build something meaningful.
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
+  </div>
 
-          {/* Hero image composition */}
+  {/* SCROLL INDICATOR */}
+  <motion.a
+    href="#who-we-are"
+    initial={shouldReduceMotion ? false : { opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 1.7 }}
+    className="absolute bottom-7 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3"
+  >
+    <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-white/60">
+      Scroll to explore
+    </span>
 
-          <motion.div
-            initial={
-              shouldReduceMotion
-                ? false
-                : { opacity: 0, scale: 0.85, x: 50 }
-            }
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 1.2, delay: 0.3 }}
-            className="relative mx-auto w-full max-w-135"
-          >
-            <div className="relative aspect-4/5 max-h-155">
+    <motion.div
+      animate={
+        shouldReduceMotion
+          ? {}
+          : { scaleY: [0.3, 1, 0.3] }
+      }
+      transition={{
+        duration: 1.6,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      className="h-9 w-px origin-top bg-[#D4AF37]"
+    />
+  </motion.a>
 
-              {/* Main image */}
+</section>
 
-              <motion.div
-                animate={shouldReduceMotion ? {} : { y: [0, -14, 0] }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute inset-x-8 inset-y-5 overflow-hidden rounded-[45%_45%_20px_20px] border border-[#D4AF37]/20"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1531058020387-3be344556be6?w=1000&q=85"
-                  alt="Creative event and brand experience"
-                  className="h-full w-full object-cover"
-                />
 
-                <div className="absolute inset-0 bg-linear-to-t from-[#171717]/90 via-transparent to-[#171717]/10" />
-
-                <div className="absolute inset-0 bg-[#D4AF37]/10 mix-blend-overlay" />
-              </motion.div>
-
-              {/* Gold border */}
-
-              <div className="pointer-events-none absolute inset-0 rounded-[45%_45%_20px_20px] border border-[#D4AF37]/20" />
-
-              {/* Floating card */}
-
-              <motion.div
-                animate={
-                  shouldReduceMotion
-                    ? {}
-                    : { y: [0, 12, 0], rotate: [0, 2, 0] }
-                }
-                transition={{ duration: 5, repeat: Infinity }}
-                className="absolute -left-3 top-24 z-20 rounded-2xl border border-white/10 bg-[#242424]/90 p-4 shadow-2xl backdrop-blur-xl sm:-left-8"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#D4AF37]/15 text-[#D4AF37]">
-                    <Target size={23} />
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-white/40">
-                      Our mindset
-                    </p>
-
-                    <p className="mt-1 text-sm font-semibold">
-                      Think Bigger.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Floating bottom card */}
-
-              <motion.div
-                animate={
-                  shouldReduceMotion ? {} : { y: [0, -10, 0] }
-                }
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -right-2 bottom-24 z-20 rounded-2xl border border-[#D4AF37]/20 bg-[#242424]/95 p-4 shadow-2xl backdrop-blur-xl sm:-right-7"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D4AF37] text-[#171717]">
-                    <Zap size={20} />
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-white/40">
-                      The Buzzify way
-                    </p>
-
-                    <p className="mt-1 text-sm font-semibold">
-                      Create. Connect. Grow.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Decorative star */}
-
-              <motion.div
-                animate={
-                  shouldReduceMotion ? {} : { rotate: 360 }
-                }
-                transition={{
-                  duration: 18,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute -right-3 top-10 text-[#D4AF37]"
-              >
-                <Sparkles size={50} strokeWidth={1} />
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator */}
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 lg:flex"
-        >
-          <span className="text-[9px] uppercase tracking-[0.3em] text-white/40">
-            Scroll to explore
-          </span>
-
-          <motion.div
-            animate={{ scaleY: [0.3, 1, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="h-9 w-px origin-top bg-[#D4AF37]"
-          />
-        </motion.div>
-      </section>
 
 
       {/* =========================================
