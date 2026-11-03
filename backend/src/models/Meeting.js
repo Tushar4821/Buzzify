@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const meetingSchema = new mongoose.Schema(
@@ -45,13 +46,31 @@ const meetingSchema = new mongoose.Schema(
       maxlength: 2000,
     },
 
+    // Date originally requested by the client
     preferredDate: {
       type: Date,
     },
 
+    // Final date and time selected by the admin
+    scheduledDate: {
+      type: String,
+      trim: true,
+    },
+
+    scheduledTime: {
+      type: String,
+      trim: true,
+    },
+
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
+      enum: [
+        "pending",
+        "confirmed",
+        "rejected",
+        "completed",
+        "cancelled",
+      ],
       default: "pending",
     },
 
@@ -61,9 +80,7 @@ const meetingSchema = new mongoose.Schema(
       default: null,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Meeting = mongoose.model("Meeting", meetingSchema);

@@ -24,12 +24,14 @@ import authRouter from "./routes/authRoutes.js"
 import serviceRouter from "./routes/serviceRoutes.js"
 import portfolioRouter from "./routes/portfolioRoutes.js"
 import meetingRouter from "./routes/meetingRoutes.js"
+import userRouter from "./routes/userRoutes.js"
 
 
 app.use("/api/auth",authRouter)
 app.use("/api/service",serviceRouter)
 app.use('/api/portfolio',portfolioRouter)
 app.use('/api/meeting',meetingRouter)
+app.use("/api/users", userRouter);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;

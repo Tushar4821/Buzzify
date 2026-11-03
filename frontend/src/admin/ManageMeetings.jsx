@@ -5,7 +5,6 @@ import {
   RefreshCw,
   CalendarDays,
   Clock,
-  User,
   Mail,
   Phone,
   Building2,
@@ -25,6 +24,7 @@ const API_URL = "http://localhost:3000/api/meeting";
 const statuses = [
   "pending",
   "confirmed",
+  "rejected",
   "completed",
   "cancelled",
 ];
@@ -39,6 +39,11 @@ export default function ManageMeetings() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [selectedMeeting, setSelectedMeeting] = useState(null);
+
+  const [confirmingMeeting, setConfirmingMeeting] = useState(null);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -59,9 +64,7 @@ export default function ManageMeetings() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to fetch meetings"
-        );
+        throw new Error(data.message || "Failed to fetch meetings");
       }
 
       const meetingList =
@@ -119,20 +122,69 @@ export default function ManageMeetings() {
     });
   };
 
+  // Format scheduled date without timezone shifting
+  const formatScheduledDate = (date) => {
+    if (!date) return "Not scheduled";
+
+    const [year, month, day] = date.split("-").map(Number);
+
+    if (!year || !month || !day) return date;
+
+    return new Date(year, month - 1, day).toLocaleDateString(
+      "en-IN",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
   // Status badge
   const getStatusStyle = (status) => {
     const styles = {
-      pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-      confirmed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      completed: "bg-green-500/10 text-green-400 border-green-500/20",
-      cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
+      pending:
+        "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      confirmed:
+        "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      rejected:
+        "bg-orange-500/10 text-orange-400 border-orange-500/20",
+      completed:
+        "bg-green-500/10 text-green-400 border-green-500/20",
+      cancelled:
+        "bg-red-500/10 text-red-400 border-red-500/20",
     };
 
     return styles[status] || styles.pending;
   };
 
+  // Open confirmation modal
+  const openConfirmationModal = (meeting) => {
+    setConfirmingMeeting(meeting);
+
+    if (meeting.preferredDate) {
+      const date = new Date(meeting.preferredDate);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      setScheduledDate(`${year}-${month}-${day}`);
+    } else {
+      setScheduledDate("");
+    }
+
+    setScheduledTime("");
+    setError("");
+    setSuccess("");
+  };
+
   // Update meeting status
-  const updateStatus = async (meetingId, status) => {
+  const updateStatus = async (
+    meetingId,
+    status,
+    extraDetails = {}
+  ) => {
     const token = localStorage.getItem("buzzifyToken");
 
     setUpdatingId(meetingId);
@@ -148,7 +200,10 @@ export default function ManageMeetings() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({
+            status,
+            ...extraDetails,
+          }),
         }
       );
 
@@ -175,12 +230,48 @@ export default function ManageMeetings() {
         }));
       }
 
-      setSuccess(`Meeting marked as ${status}.`);
+      if (status === "confirmed" || status === "rejected") {
+        if (data.emailSent === false) {
+          setSuccess(
+            `Meeting ${status}, but the email could not be sent. Check your backend logs.`
+          );
+        } else {
+          setSuccess(
+            `Meeting ${status} successfully. Client email sent.`
+          );
+        }
+      } else {
+        setSuccess(`Meeting marked as ${status}.`);
+      }
+
+      if (status === "confirmed") {
+        setConfirmingMeeting(null);
+        setScheduledDate("");
+        setScheduledTime("");
+      }
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  // Handle status button actions
+  const handleStatusAction = (meeting, action) => {
+    if (action.value === "confirmed") {
+      openConfirmationModal(meeting);
+      return;
+    }
+
+    if (action.value === "rejected") {
+      const confirmed = window.confirm(
+        `Are you sure you want to reject ${meeting.name}'s meeting request? A rejection email will be sent.`
+      );
+
+      if (!confirmed) return;
+    }
+
+    updateStatus(meeting._id, action.value);
   };
 
   // Delete meeting
@@ -222,6 +313,10 @@ export default function ManageMeetings() {
 
       if (selectedMeeting?._id === meeting._id) {
         setSelectedMeeting(null);
+      }
+
+      if (confirmingMeeting?._id === meeting._id) {
+        setConfirmingMeeting(null);
       }
 
       setSuccess("Meeting request deleted successfully.");
@@ -290,15 +385,23 @@ export default function ManageMeetings() {
   // Dashboard counts
   const counts = {
     total: meetings.length,
+
     pending: meetings.filter(
       (meeting) => meeting.status === "pending"
     ).length,
+
     confirmed: meetings.filter(
       (meeting) => meeting.status === "confirmed"
     ).length,
+
+    rejected: meetings.filter(
+      (meeting) => meeting.status === "rejected"
+    ).length,
+
     completed: meetings.filter(
       (meeting) => meeting.status === "completed"
     ).length,
+
     cancelled: meetings.filter(
       (meeting) => meeting.status === "cancelled"
     ).length,
@@ -309,7 +412,7 @@ export default function ManageMeetings() {
     if (status === "pending") {
       return [
         { label: "Confirm", value: "confirmed" },
-        { label: "Cancel", value: "cancelled" },
+        { label: "Reject", value: "rejected" },
       ];
     }
 
@@ -358,6 +461,7 @@ export default function ManageMeetings() {
       {error && (
         <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
           <span>{error}</span>
+
           <button onClick={() => setError("")}>
             <X size={17} />
           </button>
@@ -367,6 +471,7 @@ export default function ManageMeetings() {
       {success && (
         <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-400">
           <span>{success}</span>
+
           <button onClick={() => setSuccess("")}>
             <X size={17} />
           </button>
@@ -374,7 +479,7 @@ export default function ManageMeetings() {
       )}
 
       {/* Statistics */}
-      <div className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-5">
+      <div className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-6">
         {[
           {
             label: "Total Requests",
@@ -390,6 +495,11 @@ export default function ManageMeetings() {
             label: "Confirmed",
             value: counts.confirmed,
             color: "text-blue-400",
+          },
+          {
+            label: "Rejected",
+            value: counts.rejected,
+            color: "text-orange-400",
           },
           {
             label: "Completed",
@@ -451,8 +561,7 @@ export default function ManageMeetings() {
 
             {statuses.map((status) => (
               <option key={status} value={status}>
-                {status.charAt(0).toUpperCase() +
-                  status.slice(1)}
+                {status.charAt(0).toUpperCase() + status.slice(1)}
               </option>
             ))}
           </select>
@@ -542,7 +651,10 @@ export default function ManageMeetings() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <BriefcaseBusinessIcon />
+                      <Beer
+                        size={16}
+                        className="shrink-0 text-[#D4AF37]"
+                      />
                       {meeting.service}
                     </div>
 
@@ -561,6 +673,17 @@ export default function ManageMeetings() {
                       />
                       Requested: {formatDate(meeting.createdAt)}
                     </div>
+
+                    {meeting.status === "confirmed" &&
+                      meeting.scheduledDate && (
+                        <div className="flex items-center gap-2 text-blue-400">
+                          <CalendarDays size={16} />
+                          Meeting: {formatScheduledDate(
+                            meeting.scheduledDate
+                          )}{" "}
+                          {meeting.scheduledTime}
+                        </div>
+                      )}
                   </div>
                 </div>
 
@@ -574,42 +697,38 @@ export default function ManageMeetings() {
                     Details
                   </button>
 
-                  {getNextActions(meeting.status).map(
-                    (action) => (
-                      <button
-                        key={action.value}
-                        disabled={updatingId === meeting._id}
-                        onClick={() =>
-                          updateStatus(
-                            meeting._id,
-                            action.value
-                          )
-                        }
-                        className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${
-                          action.value === "confirmed"
-                            ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                            : action.value === "completed"
-                            ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                            : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                        }`}
-                      >
-                        {updatingId === meeting._id ? (
-                          <RefreshCw
-                            size={15}
-                            className="animate-spin"
-                          />
-                        ) : action.value === "confirmed" ? (
-                          <CheckCircle2 size={15} />
-                        ) : action.value === "completed" ? (
-                          <CheckCircle2 size={15} />
-                        ) : (
-                          <XCircle size={15} />
-                        )}
+                  {getNextActions(meeting.status).map((action) => (
+                    <button
+                      key={action.value}
+                      disabled={updatingId === meeting._id}
+                      onClick={() =>
+                        handleStatusAction(meeting, action)
+                      }
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${
+                        action.value === "confirmed"
+                          ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                          : action.value === "completed"
+                          ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                          : action.value === "rejected"
+                          ? "bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
+                          : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                      }`}
+                    >
+                      {updatingId === meeting._id ? (
+                        <RefreshCw
+                          size={15}
+                          className="animate-spin"
+                        />
+                      ) : action.value === "confirmed" ||
+                        action.value === "completed" ? (
+                        <CheckCircle2 size={15} />
+                      ) : (
+                        <XCircle size={15} />
+                      )}
 
-                        {action.label}
-                      </button>
-                    )
-                  )}
+                      {action.label}
+                    </button>
+                  ))}
 
                   <button
                     onClick={() => deleteMeeting(meeting)}
@@ -682,7 +801,7 @@ export default function ManageMeetings() {
                   value: selectedMeeting.company || "Not provided",
                 },
                 {
-                  icon: BriefcaseBusinessIcon,
+                  icon: Beer,
                   label: "Interested Service",
                   value: selectedMeeting.service,
                 },
@@ -690,6 +809,18 @@ export default function ManageMeetings() {
                   icon: CalendarDays,
                   label: "Preferred Date",
                   value: formatDate(selectedMeeting.preferredDate),
+                },
+                {
+                  icon: CalendarDays,
+                  label: "Confirmed Date",
+                  value: formatScheduledDate(
+                    selectedMeeting.scheduledDate
+                  ),
+                },
+                {
+                  icon: Clock,
+                  label: "Confirmed Time",
+                  value: selectedMeeting.scheduledTime || "Not scheduled",
                 },
                 {
                   icon: Clock,
@@ -736,46 +867,138 @@ export default function ManageMeetings() {
 
             {getNextActions(selectedMeeting.status).length > 0 && (
               <div className="mt-6 flex flex-wrap gap-3">
-                {getNextActions(selectedMeeting.status).map(
-                  (action) => (
-                    <button
-                      key={action.value}
-                      disabled={
-                        updatingId === selectedMeeting._id
-                      }
-                      onClick={() =>
-                        updateStatus(
-                          selectedMeeting._id,
-                          action.value
-                        )
-                      }
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${
-                        action.value === "confirmed"
-                          ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                          : action.value === "completed"
-                          ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                          : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                      }`}
-                    >
-                      {action.label}
-                    </button>
-                  )
-                )}
+                {getNextActions(selectedMeeting.status).map((action) => (
+                  <button
+                    key={action.value}
+                    disabled={updatingId === selectedMeeting._id}
+                    onClick={() =>
+                      handleStatusAction(selectedMeeting, action)
+                    }
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${
+                      action.value === "confirmed"
+                        ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                        : action.value === "completed"
+                        ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                        : action.value === "rejected"
+                        ? "bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
+                        : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                    }`}
+                  >
+                    {action.label}
+                  </button>
+                ))}
               </div>
             )}
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
-// Small icon component for the service information
-function BriefcaseBusinessIcon() {
-  return (
-    <Beer
-      size={16}
-      className="shrink-0 text-[#D4AF37]"
-    />
+      {/* Confirm meeting modal */}
+      {confirmingMeeting && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#242424] p-6 shadow-2xl">
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#D4AF37]">
+                  Schedule Appointment
+                </p>
+
+                <h2 className="text-2xl font-bold">
+                  Confirm Meeting
+                </h2>
+
+                <p className="mt-2 text-sm text-gray-400">
+                  Set the final date and time for{" "}
+                  {confirmingMeeting.name}.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setConfirmingMeeting(null)}
+                className="rounded-lg p-2 text-gray-400 transition hover:bg-white/5 hover:text-white"
+              >
+                <X size={21} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+
+                updateStatus(confirmingMeeting._id, "confirmed", {
+                  scheduledDate,
+                  scheduledTime,
+                });
+              }}
+              className="space-y-5"
+            >
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-300">
+                  Final Meeting Date
+                </label>
+
+                <input
+                  type="date"
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-white outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-300">
+                  Final Meeting Time
+                </label>
+
+                <input
+                  type="time"
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-white/10 bg-[#171717] px-4 py-3 text-white outline-none focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div className="rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5 p-4 text-sm text-gray-400">
+                The client will receive an email containing this confirmed meeting schedule.
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmingMeeting(null)}
+                  className="flex-1 rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold text-gray-300 transition hover:bg-white/5"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={
+                    !scheduledDate ||
+                    !scheduledTime ||
+                    updatingId === confirmingMeeting._id
+                  }
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-3 text-sm font-bold text-black transition hover:bg-[#e5c34f] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updatingId === confirmingMeeting._id ? (
+                    <RefreshCw
+                      size={16}
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <CheckCircle2 size={16} />
+                  )}
+
+                  Confirm Meeting
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

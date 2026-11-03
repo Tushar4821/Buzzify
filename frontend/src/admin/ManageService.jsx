@@ -8,6 +8,15 @@ import {
   RefreshCw,
   Search,
   BriefcaseBusiness,
+  Camera,
+  Clapperboard,
+  Palette,
+  TrendingUp,
+  CalendarDays,
+  Megaphone,
+  Video,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api/service";
@@ -17,6 +26,20 @@ const emptyForm = {
   description: "",
   icon: "briefcase-business",
   features: "",
+};
+
+const iconMap = {
+  "briefcase-business": BriefcaseBusiness,
+  instagram: CalendarDays,
+  camera: Camera,
+  clapperboard: Clapperboard,
+  palette: Palette,
+  "trending-up": TrendingUp,
+  "calendar-days": CalendarDays,
+  megaphone: Megaphone,
+  video: Video,
+  users: Users,
+  "message-square": MessageSquare,
 };
 
 export default function ManageServices() {
@@ -324,8 +347,11 @@ export default function ManageServices() {
               {/* Card header */}
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
-                  <BriefcaseBusiness size={23} />
-                </div>
+  {(() => {
+    const Icon = iconMap[service.icon?.toLowerCase()] || BriefcaseBusiness;
+    return <Icon size={23} />;
+  })()}
+</div>
 
                 <div className="flex gap-2">
                   <button

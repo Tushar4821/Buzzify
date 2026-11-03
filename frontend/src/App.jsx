@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/footer.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 import Home from "./pages/Home.jsx";
 import Register from "./pages/Register.jsx";
@@ -20,6 +21,7 @@ import AdminRoute from "./admin/AdminRoutes.jsx";
 import ManageServices from "./admin/ManageService.jsx";
 import ManageWork from "./admin/ManageWork.jsx";
 import ManageMeetings from "./admin/ManageMeetings.jsx";
+import ManageClients from "./admin/ManageClients.jsx";
 
 function Placeholder({ title }) {
   return (
@@ -54,37 +56,25 @@ function PublicLayout() {
 }
 
 export default function App() {
- return (
-  <Routes>
-    {/* Protected admin routes */}
-    <Route element={<AdminRoute />}>
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminDashboard />} />
+  return (
+    <>
+      <ScrollToTop />
 
-        <Route
-  path="services"
-  element={<ManageServices />}
-/>
+      <Routes>
+        {/* Protected admin routes */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="services" element={<ManageServices />} />
+            <Route path="work" element={<ManageWork />} />
+            <Route path="meetings" element={<ManageMeetings />} />
+            <Route path="clients" element={<ManageClients />} />
+          </Route>
+        </Route>
 
-        <Route
-  path="work"
-  element={<ManageWork />}
-/>
-
-        <Route
-  path="meetings"
-  element={<ManageMeetings />}
-/>
-
-        <Route
-          path="clients"
-          element={<Placeholder title="Client Accounts" />}
-        />
-      </Route>
-    </Route>
-
-    {/* Public website */}
-    <Route path="/*" element={<PublicLayout />} />
-  </Routes>
-);
+        {/* Public website */}
+        <Route path="/*" element={<PublicLayout />} />
+      </Routes>
+    </>
+  );
 }
